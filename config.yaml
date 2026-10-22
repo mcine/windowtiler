@@ -1,0 +1,238 @@
+# ==============================================================================
+# Window Tiler Configuration
+# This file is monitored every 10 seconds for changes and hot-reloaded automatically.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. GAME WINDOWS (Active Poker Tables)
+# Arranges 2 to 4 tables to utilize full screen with configurable vertical overlap.
+# ------------------------------------------------------------------------------
+game_windows:
+  filter:
+    # Strings to identify poker table windows:
+    # If any of these strings is part of a window title, it is counted as a game window
+    titles:
+      - "Hold'em"
+      - "Omaha"
+      - "Tournament"
+      - "Table"
+      - "NLH"
+
+    # Exclude strings: If any of these strings is part of a title, the window is ignored
+    exclude:
+      - "Lobby"
+      - "Cashier"
+      - "Tournament Lobby"
+      - "Pokeri"
+
+
+    # Win32 Class Name strings (optional list):
+    # If specified, window class must contain any of these strings
+    classes: []
+
+    # Exclude Win32 Class Names:
+    # If any of these strings is part of the class name, the window is ignored
+    exclude_classes:
+      - "CabinetWClass"
+
+
+    case_sensitive: false
+    sort_by: "hwnd"
+
+  # Active arrangement strategy for game windows:
+  #   - 'default':      Default widescreen layout with aspect ratio & 0-gap (fills 2 tables, 4 tables with overlap, 6 tables)
+  #   - 'custom':       Custom slot-based layout loaded from files in the 'layouts/' directory.
+  #                     Fits tables into designated slot boxes (top-left aligned, aspect ratio kept).
+  #                     Supports multiple monitors (e.g. monitor: 0, monitor: 1).
+  #                     Windows without a box remain in manual control.
+  #   - 'grid':         NxM grid (2x2, 3x2, etc.)
+  #   - 'stack':        Stacked / cascaded windows
+  strategy: "default"
+
+  # Overflow window slot reuse handling ("reuse window slots"):
+  # Controls how to handle extra tables when there are more windows than available slots/spots.
+  #   - "" (empty, default): Ignores overflow windows; extra tables remain in manual control.
+  #   - "last" or "last slot": All overflow windows go to the last slot.
+  #   - "recycle": Places 1st overflow to 1st slot, 2nd to 2nd slot, 3rd to 3rd slot, and so on.
+  reuse_window_slots: ""
+
+  strategy_config:
+    default:
+      # Gap between tables in pixels (0 for maximum screen utilization)
+      gap: 0
+
+      # Keep windows aspect ratio at all times (true/false)
+      keep_aspect_ratio: true
+
+      # Aspect ratio: 'auto' (detects from poker tables or 16:10), or numeric (e.g. 1.625)
+      aspect_ratio: "auto"
+
+      # Vertical overlap in pixels between table rows:
+      # For 6-table mode (default: 50)
+      vertical_overlap: 50
+
+      # For 4-table mode: bigger overlap (default: 200)
+      # 4-table mode can have a completely separate, larger overlap and larger table sizes than 6-table mode
+      vertical_overlap_4_tables: 300
+
+      # Maximum arranged spots on screen when > 4 tables are open (default: 6 spots)
+      # Tables beyond this number will remain unarranged in the background.
+      max_spots: 6
+
+      # Slot for single window: 'left', 'right', 'center', or 'full'
+      single_window_slot: "left"
+
+    custom:
+      # Layout file name from the 'layouts/' directory (e.g. 'testlayout', '6_tables', or custom name)
+      layout_name: "testlayout"
+
+      # Maintain aspect ratio when fitting into the slot boxes (true/false)
+      keep_aspect_ratio: true
+
+      # Aspect ratio: 'auto' (detects from tables) or fixed numeric (e.g. 1.625)
+      aspect_ratio: "auto"
+
+    grid:
+      columns: 2
+      rows: 2
+      gap: 0
+    stack:
+      offset_x: 30
+      offset_y: 30
+      width_ratio: 0.8
+      height_ratio: 0.8
+
+# ------------------------------------------------------------------------------
+# 2. OTHER POKER WINDOWS (Lobbies, Cashiers, Notes, HUD)
+# Positioned side-by-side along the bottom edge without resizing.
+# ------------------------------------------------------------------------------
+other_windows:
+  # Enable/disable arranging other windows
+  enabled: true
+
+  filter:
+    # Strings to identify auxiliary poker windows (lobbies, cashier, tournament lobby, notes, hud)
+    # If any of these strings is part of a window title, it is positioned at the bottom
+    titles:
+      - "Lobby"
+      - "Cashier"
+      - "Tournament Lobby"
+      - "Notes"
+      - "HUD"
+
+    # Exclude strings: If any of these strings is part of a title, the window is ignored
+    exclude:
+      - "File Explorer"
+      - "Visual Studio"
+      - "WhatsApp"
+      - "Discord"
+      - "PuTTY"
+
+    # Win32 Class Name strings (optional list)
+    classes: []
+
+    # Exclude Win32 Class Names
+    exclude_classes:
+      - "CabinetWClass"
+      - "Chrome_WidgetWin_1"
+
+    case_sensitive: false
+    sort_by: "hwnd"
+
+  layout:
+    # resize: false -> Preserves the natural window size of the lobby (does not stretch or resize)
+    resize: false
+    gap: 0
+    alignment: "left"  # 'left', 'center', or 'right'
+    reserve_space_only_if_present: true
+
+    # Only reserve bottom strip on screen if game tables <= 2.
+    # When > 2 game tables are open, tables take the WHOLE screen, and the lobby
+    # remains in the background unless called via Shift+MiddleClick or F9.
+    reserve_space_max_tables: 2
+
+  # ----------------------------------------------------------------------------
+  # QUICK VIEW / BRING-TO-FRONT FOR OTHER WINDOWS:
+  # How to easily see your lobby/cashier when needed:
+  # ----------------------------------------------------------------------------
+  # Dedicated keyboard shortcut to bring auxiliary windows to the front
+  toggle_shortcut: "F9"
+
+  # Shift + Middle Mouse Click brings other windows to front (safe, doesn't interfere with betting)
+  shift_middle_click_to_front: true
+
+  # If true, plain Middle Mouse Click will bring both RNG AND other windows to front
+  # (Set false so middle click only pops up the RNG during hand decisions)
+  middle_mouse_triggers_both: false
+
+# ------------------------------------------------------------------------------
+# 3. RANDOM NUMBER GENERATOR (RNG) / DECISION ASSISTANT
+# Displays a random number (0-100) in a large bold font.
+# - Color is GREEN if random number > slider threshold
+# - Color is RED if random number <= slider threshold
+# - Automatically re-rolls every 10s, or when clicked, or when window gains focus.
+# ------------------------------------------------------------------------------
+rng:
+  # Enable or disable the RNG feature completely
+  enabled: true
+
+  # Screen position:
+  #   'top_center' (default) -> sits at top edge in the center between left & right tables
+  #   'center'               -> middle of screen
+  #   'top_left'             -> upper left corner
+  #   'top_right'            -> upper right corner
+  #   'custom'               -> specify custom_x and custom_y below
+  position: "top_center"
+  offset_y: 0                   # Pixels from top edge
+  offset_x: 0                   # Horizontal pixel adjustment
+  custom_x: 0
+  custom_y: 0
+
+  # Toggle window when Middle Mouse Button is clicked
+  trigger_middle_mouse: true
+
+  # Configurable keyboard shortcut to toggle window (e.g. "F8", "Space", "F9", "R")
+  shortcut: "F8"
+
+  # Default threshold value for the slider (0 to 100)
+  default_threshold: 50
+
+  # Periodic re-roll interval in seconds (default: 10s)
+  auto_update_seconds: 10.0
+
+  # Keep window always on top of poker tables
+  stay_on_top: true
+
+  window_width: 240
+  window_height: 250
+
+# ------------------------------------------------------------------------------
+# 4. MONITOR SETTINGS (Full screen utilization, zero margins)
+# ------------------------------------------------------------------------------
+monitor:
+  # Monitor index: 0 is the primary monitor, 1 is the secondary monitor, etc.
+  index: 0
+  margin:
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+
+# ------------------------------------------------------------------------------
+# 5. RUNTIME SETTINGS
+# ------------------------------------------------------------------------------
+runtime:
+  # Interval in seconds to scan and arrange poker windows
+  arrange_interval_seconds: 2.0
+
+  # Interval in seconds to check this configuration file for changes (default: 10s)
+  config_check_interval_seconds: 10.0
+
+  # Automatically restore windows that are currently minimized (false: leaves minimized windows alone)
+  restore_minimized: false
+
+  # Bring arranged windows to the foreground
+  bring_to_front: false
+
+  # Compensate for Windows 10/11 invisible DWM borders to ensure 0-pixel gaps
+  compensate_borders: true
