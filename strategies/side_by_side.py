@@ -133,11 +133,11 @@ class SideBySideLayout(ArrangementStrategy):
             ]
 
             if n_base == 3:
-                # 2 on left (stacked), 1 on right
+                # 2 on top (horizontal: left, right), 1 on bottom left (vertical)
                 spots_3 = [
-                    Rect(cols_x[0], rows_y[0], table_w, table_h),
-                    Rect(cols_x[0], rows_y[1], table_w, table_h),
-                    Rect(cols_x[1], rows_y[0], table_w, table_h),
+                    Rect(cols_x[0], rows_y[0], table_w, table_h),  # 0: Top-Left
+                    Rect(cols_x[1], rows_y[0], table_w, table_h),  # 1: Top-Right
+                    Rect(cols_x[0], rows_y[1], table_w, table_h),  # 2: Bottom-Left
                 ]
                 return self.assign_windows_to_spots(active_windows, spots_3, reuse_mode=reuse_mode)
 

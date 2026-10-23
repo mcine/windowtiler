@@ -98,12 +98,9 @@ def test_default_project_layouts_exist():
     """Verify that default preset layouts are in place and valid."""
     default_dir = get_layout_dir()
     available = list_layouts(default_dir)
-    assert "2_tables" in available
-    assert "4_tables" in available
-    assert "6_tables" in available
-    assert "8_tables" in available
+    assert "testlayout" in available
 
-    for name in ("2_tables", "4_tables", "6_tables", "8_tables"):
+    for name in ("testlayout",):
         data, path = load_layout_file(name, default_dir)
         slots = data.get("slots") or data.get("game_windows")
         assert len(slots) > 0

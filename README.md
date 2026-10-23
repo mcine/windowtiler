@@ -104,7 +104,7 @@ game_windows:
 The **`default`** layout arranges tables side-by-side with zero pixel gaps between columns:
 - **1 Table**: Positioned at top-left, scaled to fit work area height.
 - **2 Tables**: Divides and fills 100% of the screen width with zero gaps between the two columns and screen edges.
-- **3 to 4 Tables**: 2 columns &times; 2 rows with an increased vertical overlap (default 200px) that keeps bet controls visible while using 0-pixel gap between adjacent columns and allocating any leftover horizontal space to the right side.
+- **3 to 4 Tables**: 2 columns &times; 2 rows with configurable vertical overlap (default 200px) that keeps bet controls visible while using 0-pixel gap between adjacent columns and allocating any leftover horizontal space to the right side. Old windows fill the top row horizontally first (Top-Left then Top-Right), new windows fill the bottom row vertically, and newly opened tables go to the back behind older tables.
 - **5 to 6 Tables**: 3 columns &times; 2 rows with vertical overlap (default 50px). Leftover vertical space is allocated to the bottom of the screen.
 
 ### 2. Custom Layouts (Directory: `layouts/`)
@@ -173,7 +173,7 @@ The test launcher (`test_window_launcher.py`) provides an interactive GUI to tes
 py test_window_launcher.py
 
 # Launch directly loading a saved layout preset
-py test_window_launcher.py --load 6_tables
+py test_window_launcher.py --load testlayout
 ```
 
 ### Features of the Launcher:

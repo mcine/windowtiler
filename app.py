@@ -285,8 +285,9 @@ class WindowTilerApp:
         if len(self.arranged_game_hwnds) > max_spots:
             self.arranged_game_hwnds = self.arranged_game_hwnds[:max_spots]
 
-        arranged_set = set(self.arranged_game_hwnds)
-        return [w for w in matched_games if w.hwnd in arranged_set]
+        # Maintain arrival order (old windows first, new windows at end)
+        win_map = {w.hwnd: w for w in matched_games}
+        return [win_map[h] for h in self.arranged_game_hwnds if h in win_map]
 
     def arrange_windows(self, dry_run: bool = False, verbose: bool = False) -> int:
         """
@@ -374,8 +375,20 @@ class WindowTilerApp:
                 self.arranged_game_hwnds = [w.hwnd for w in matched_games]
 
             game_placements = self.game_strategy.arrange(tables_to_arrange, game_area, strat_cfg)
-            for gp in game_placements:
-                all_placements.append((gp, "game", False))
+            n_tables = len(tables_to_arrange)
+            for idx, gp in enumerate(game_placements):
+                # In more than 2 windows, new windows (idx >= 2) go to the back (behind previous tables)
+                insert_after_hwnd = None
+                if n_tables > 2 and idx >= 2 and idx < len(tables_to_arrange):
+                    insert_after_hwnd = tables_to_arrange[idx - 1].hwnd
+                final_insert_after = insert_after_hwnd if insert_after_hwnd is not None else getattr(gp, "insert_after", None)
+                p_with_z = win_utils.WindowPlacement(
+                    hwnd=gp.hwnd,
+                    rect=gp.rect,
+                    allow_resize=gp.allow_resize,
+                    insert_after=final_insert_after,
+                )
+                all_placements.append((p_with_z, "game", False))
 
         runtime_cfg = self.config.get("runtime", {})
         restore_min = bool(runtime_cfg.get("restore_minimized", False))
@@ -406,7 +419,8 @@ class WindowTilerApp:
 
             if dry_run:
                 bg_note = " (background)" if send_bottom else ""
-                print(f"  [Dry-run] Would place {tag} '{title}' at (x={p.rect.x}, y={p.rect.y}, w={p.rect.width}, h={p.rect.height}){bg_note}")
+                back_note = " (to back)" if (getattr(p, "insert_after", None) is not None) else ""
+                print(f"  [Dry-run] Would place {tag} '{title}' at (x={p.rect.x}, y={p.rect.y}, w={p.rect.width}, h={p.rect.height}){bg_note}{back_note}")
                 moved_count += 1
             else:
                 applied = win_utils.apply_window_placement(
@@ -419,7 +433,8 @@ class WindowTilerApp:
                 if applied:
                     moved_count += 1
                     bg_note = " (in background)" if send_bottom else ""
-                    print(f"  [Arranged {tag}] '{title}' -> (x={p.rect.x}, y={p.rect.y}, w={p.rect.width}, h={p.rect.height}){bg_note}")
+                    back_note = " (in back)" if (getattr(p, "insert_after", None) is not None) else ""
+                    print(f"  [Arranged {tag}] '{title}' -> (x={p.rect.x}, y={p.rect.y}, w={p.rect.width}, h={p.rect.height}){bg_note}{back_note}")
 
         return moved_count
 

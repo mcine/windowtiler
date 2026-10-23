@@ -4,7 +4,8 @@ strategies/other_bottom.py - Layout strategy for 'other poker windows' at the bo
 Arranges auxiliary windows (main lobbies, cashiers, tournament lobbies, HUD, notes)
 side-by-side along the bottom edge of the monitor work area.
 Preserves their original window dimensions (allow_resize=False) without resizing,
-changing only their positions (x, y) so windows are placed side-by-side along the bottom.
+changing only their positions (x, y) so windows are placed along the bottom without
+ever extending off-screen to the right.
 """
 
 from typing import Any, Dict, List
@@ -17,6 +18,8 @@ class OtherBottomLayout(ArrangementStrategy):
     Arranges other/auxiliary poker windows side-by-side along the bottom of the screen.
     Preserves original window dimensions (resize=False, allow_resize=False), strictly
     changing only position (x, y) unless resize is explicitly requested in config.
+    Guarantees that windows never spill off-screen to the right by anchoring to the right
+    screen edge when necessary.
     """
 
     name: str = "other_bottom"
@@ -44,7 +47,7 @@ class OtherBottomLayout(ArrangementStrategy):
             total_windows_w = sum(win.rect.width for win in windows) + total_gaps
 
             if alignment == "right":
-                curr_x = work_area.right - total_windows_w
+                curr_x = max(work_area.x, work_area.right - total_windows_w)
             elif alignment == "center":
                 curr_x = work_area.x + max(0, (work_area.width - total_windows_w) // 2)
             else:  # 'left' default
@@ -54,9 +57,16 @@ class OtherBottomLayout(ArrangementStrategy):
                 w = win.rect.width
                 h = win.rect.height
 
+                # Ensure window never spills off-screen to the right.
+                # If placing at curr_x would push it past the right edge of the work area,
+                # anchor its right edge to work_area.right while strictly preserving width.
+                if curr_x + w > work_area.right:
+                    x = max(work_area.x, work_area.right - w)
+                else:
+                    x = curr_x
+
                 # Bottom-aligned to work area bottom
                 y = work_area.bottom - h
-                x = curr_x
 
                 placements.append(
                     WindowPlacement(
@@ -65,7 +75,7 @@ class OtherBottomLayout(ArrangementStrategy):
                         allow_resize=False,
                     )
                 )
-                curr_x += w + gap
+                curr_x = x + w + gap
 
             return placements
 

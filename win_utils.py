@@ -153,6 +153,7 @@ class WindowPlacement:
     hwnd: int
     rect: Rect
     allow_resize: bool = True
+    insert_after: Optional[int] = None
 
 
 class MONITORINFOEXW(ctypes.Structure):
@@ -335,11 +336,13 @@ def get_all_top_level_windows() -> List[WindowInfo]:
 
 
 _bottom_hwnds: set = set()
+_back_hwnds: set = set()
 
 
 def reset_bottom_state() -> None:
-    """Resets the internal set of windows placed in the background."""
+    """Resets the internal set of windows placed in the background or back of stack."""
     _bottom_hwnds.clear()
+    _back_hwnds.clear()
 
 
 def is_placement_needed(
@@ -347,6 +350,7 @@ def is_placement_needed(
     compensate_borders: bool = False,
     send_to_bottom: bool = False,
     restore_minimized: bool = False,
+    insert_after: Optional[int] = None,
 ) -> bool:
     """
     Checks whether a window actually needs to be moved, resized, or have its z-order adjusted.
@@ -356,6 +360,7 @@ def is_placement_needed(
     hwnd = placement.hwnd
     target = placement.rect
     allow_resize = getattr(placement, "allow_resize", True)
+    eff_insert_after = insert_after if insert_after is not None else getattr(placement, "insert_after", None)
 
     if not user32.IsWindow(hwnd):
         return False
@@ -386,6 +391,13 @@ def is_placement_needed(
             if hwnd in _bottom_hwnds:
                 return False  # Already in place and already in background
             return True  # Needs initial send to bottom
+        elif eff_insert_after is not None:
+            fg_hwnd = user32.GetForegroundWindow()
+            if fg_hwnd == hwnd:
+                return False  # User is using this window; do not force to back
+            if hwnd in _back_hwnds:
+                return False  # Already in place and already positioned behind
+            return True  # Needs initial placement to back of stack
         else:
             return False
 
@@ -398,6 +410,7 @@ def apply_window_placement(
     bring_to_front: bool = False,
     compensate_borders: bool = False,
     send_to_bottom: bool = False,
+    insert_after: Optional[int] = None,
 ) -> bool:
     """
     Applies the target placement (position and size) to a window ONLY if needed.
@@ -408,6 +421,7 @@ def apply_window_placement(
         compensate_borders=compensate_borders,
         send_to_bottom=send_to_bottom,
         restore_minimized=restore_minimized,
+        insert_after=insert_after,
     ):
         return False
 
@@ -416,6 +430,7 @@ def apply_window_placement(
     hwnd = placement.hwnd
     target = placement.rect
     allow_resize = getattr(placement, "allow_resize", True)
+    eff_insert_after = insert_after if insert_after is not None else getattr(placement, "insert_after", None)
 
     is_min = bool(user32.IsIconic(hwnd))
     if is_min:
@@ -461,6 +476,12 @@ def apply_window_placement(
             flags |= SWP_NOZORDER
         else:
             hwnd_insert_after = 1  # HWND_BOTTOM
+    elif eff_insert_after is not None:
+        fg_hwnd = user32.GetForegroundWindow()
+        if fg_hwnd == hwnd:
+            flags |= SWP_NOZORDER
+        else:
+            hwnd_insert_after = eff_insert_after
     elif not bring_to_front:
         flags |= SWP_NOZORDER
 
@@ -470,4 +491,9 @@ def apply_window_placement(
             _bottom_hwnds.add(hwnd)
         else:
             _bottom_hwnds.discard(hwnd)
+
+        if eff_insert_after is not None:
+            _back_hwnds.add(hwnd)
+        else:
+            _back_hwnds.discard(hwnd)
     return success

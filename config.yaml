@@ -83,7 +83,7 @@ game_windows:
       single_window_slot: "left"
 
     custom:
-      # Layout file name from the 'layouts/' directory (e.g. 'testlayout', '6_tables', or custom name)
+      # Layout file name from the 'layouts/' directory (e.g. 'testlayout', or custom name)
       layout_name: "testlayout"
 
       # Maintain aspect ratio when fitting into the slot boxes (true/false)
@@ -116,7 +116,6 @@ other_windows:
     titles:
       - "Lobby"
       - "Cashier"
-      - "Tournament Lobby"
       - "Notes"
       - "HUD"
 

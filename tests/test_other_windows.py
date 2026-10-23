@@ -120,7 +120,7 @@ def test_second_other_window_placed_next_to_first_window():
     User requirement:
     'second other window goes missing, it should go to bottom next to first one'
     Guarantees that:
-    1. Second auxiliary window goes to bottom directly next to first one.
+    1. Second auxiliary window goes to bottom directly next to first one when it fits.
     2. Zero gap / configured gap is maintained.
     3. Both are bottom-aligned at work_area.bottom.
     4. Size is untouched (allow_resize=False).
@@ -148,17 +148,21 @@ def test_second_other_window_placed_next_to_first_window():
     assert p2.rect.height == 450
     assert p2.rect.bottom == 534
     assert p2.allow_resize is False
+    assert p2.rect.right <= work_area.right
 
 
-def test_other_windows_only_change_position_never_resize():
+def test_second_other_window_does_not_go_off_screen_to_right():
     """
-    User requirement:
-    'for other windows only chaneg position, do not resize etc'
-    When second window is oversized (e.g. Pokeri:Rangeja - notes with width=2404, height=1163):
-    - Both windows preserve their natural dimensions 100% (allow_resize=False).
-    - Second window is positioned directly next to the first one at x=win1.x + win1.w + gap (x=692).
-    - Both windows are bottom-aligned at work_area.bottom.
-    - Zero resizing takes place.
+    User requirements:
+    1. 'for other windows only chaneg position, do not resize etc'
+    2. 'SECOND other window went off screen to right'
+    When second window is wide (e.g. Pokeri:Rangeja - notes with width=2404, height=1163)
+    on a 2560 display:
+    - Placing it at win1.x + win1.w would push it to x=692, right=3096 (536px off-screen!).
+    - It must NOT be resized (allow_resize=False, natural 2404x1163 size preserved).
+    - Its position must be adjusted so that it remains fully on screen (right edge <= work_area.right).
+    - It is placed at x=2560 - 2404 = 156, right=2560.
+    - Zero pixels spill off screen to the right!
     """
     layout = OtherBottomLayout()
     work_area = Rect(0, 0, 2560, 534)
@@ -177,11 +181,15 @@ def test_other_windows_only_change_position_never_resize():
     assert p1.rect.bottom == 534
     assert p1.allow_resize is False
 
-    # Second window goes directly next to first window along the bottom (x=692)
-    assert p2.rect.x == 692
-    # Natural dimensions strictly preserved
+    # Second window:
+    # 1. Natural dimensions strictly preserved (never resized)
     assert p2.rect.width == 2404
     assert p2.rect.height == 1163
-    assert p2.rect.bottom == 534
-    # allow_resize is False so Win32 sets SWP_NOSIZE and only moves position
     assert p2.allow_resize is False
+    # 2. Bottom-aligned at work_area.bottom
+    assert p2.rect.bottom == 534
+    # 3. MUST NOT GO OFF SCREEN TO RIGHT!
+    assert p2.rect.right <= work_area.right
+    assert p2.rect.right == 2560
+    assert p2.rect.x == 2560 - 2404  # 156
+    assert p2.rect.x >= work_area.x
