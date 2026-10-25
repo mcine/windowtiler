@@ -6,6 +6,7 @@ Window tiling apps are currently subscriptions and paying monthly for tiling is 
 
 It automatically organizes poker tables with **zero screen waste**, strictly preserves native **aspect ratios**, positions auxiliary windows (lobbies, cashiers, tournament lobbies, notes) at the bottom without resizing, and provides an instant on-screen **Random Number Generator (RNG)** decision HUD.
 
+
 ---
 
 ## Table of Contents
