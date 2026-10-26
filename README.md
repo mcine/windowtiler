@@ -55,13 +55,13 @@ Clone or download this repository, open PowerShell in the project directory, and
 
 ```powershell
 # Navigate to the project directory
-cd c:\misc\code\pokerwindows
+cd c:\misc\code\windowtiler
 
 # Install requirements
 py -m pip install -r requirements.txt
 ```
 
-*(Dependencies include: `pywin32`, `pyyaml`, `pytest`)*
+*(Dependencies: `PyYAML` for configuration, `pytest` for unit tests, `pyinstaller` for building executables. Windows API calls use Python's built-in `ctypes` without external dependencies.)*
 
 ### 3. Running Window Tiler
 Start the Window Tiler background manager:

@@ -1,0 +1,10 @@
+# Window Tiler dependencies
+
+# Runtime
+PyYAML>=6.0
+
+# Testing
+pytest>=8.0.0
+
+# Packaging & Build (buildexe.bat)
+pyinstaller>=6.0.0
