@@ -66,7 +66,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
                 "keep_aspect_ratio": True,
                 "aspect_ratio": "auto",
                 "vertical_overlap": 50,
-                "vertical_overlap_4_tables": 200,
+                "vertical_overlap_4_tables": 0,
                 "max_spots": 6,
                 "single_window_slot": "left",
             },

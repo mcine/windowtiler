@@ -95,6 +95,53 @@ def test_four_windows_filled_horizontally_then_vertically():
     assert p4.hwnd == 4 and p4.rect.x == p3.rect.right and p4.rect.y == p3.rect.y
 
 
+def test_four_windows_all_visible_without_overlap():
+    """
+    User requirement:
+    'I should see all windows when 4 windows active'
+    With default config (vertical_overlap_4_tables: 0):
+    - All 4 windows are placed in 4 non-overlapping quadrants.
+    - Top row and bottom row do not overlap (vertical overlap == 0).
+    - Left column and right column do not overlap (horizontal overlap == 0).
+    - All 4 windows are completely visible within the work area.
+    """
+    strategy = SideBySideLayout()
+    work_area = Rect(0, 0, 2560, 1528)
+    windows = [make_window(i, f"Table {i}") for i in range(1, 5)]
+
+    placements = strategy.arrange(windows, work_area, {
+        "gap": 0,
+        "keep_aspect_ratio": True,
+        "aspect_ratio": 1.67,
+        "vertical_overlap_4_tables": 0,
+    })
+
+    assert len(placements) == 4
+    p1, p2, p3, p4 = placements
+
+    # Top-Left, Top-Right, Bottom-Left, Bottom-Right
+    assert p1.hwnd == 1 and p2.hwnd == 2 and p3.hwnd == 3 and p4.hwnd == 4
+
+    # Top row
+    assert p1.rect.x == 0 and p1.rect.y == 0
+    assert p2.rect.x == p1.rect.right and p2.rect.y == 0
+
+    # Bottom row begins exactly at or below the bottom of the top row (0 overlap!)
+    assert p3.rect.y >= p1.rect.bottom
+    assert p4.rect.y >= p2.rect.bottom
+
+    # All windows are fully inside work area
+    for p in [p1, p2, p3, p4]:
+        assert p.rect.x >= work_area.x
+        assert p.rect.y >= work_area.y
+        assert p.rect.right <= work_area.right
+        assert p.rect.bottom <= work_area.bottom
+
+    # Overlap between row 0 and row 1 is 0
+    actual_v_overlap = max(0, p1.rect.bottom - p3.rect.y)
+    assert actual_v_overlap == 0
+
+
 def test_new_windows_go_to_back_in_app():
     """
     User requirement:

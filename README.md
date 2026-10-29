@@ -105,7 +105,7 @@ game_windows:
 The **`default`** layout arranges tables side-by-side with zero pixel gaps between columns:
 - **1 Table**: Positioned at top-left, scaled to fit work area height.
 - **2 Tables**: Divides and fills 100% of the screen width with zero gaps between the two columns and screen edges.
-- **3 to 4 Tables**: 2 columns &times; 2 rows with configurable vertical overlap (default 200px) that keeps bet controls visible while using 0-pixel gap between adjacent columns and allocating any leftover horizontal space to the right side. Old windows fill the top row horizontally first (Top-Left then Top-Right), new windows fill the bottom row vertically, and newly opened tables go to the back behind older tables.
+- **3 to 4 Tables**: 2 columns &times; 2 rows with 0-overlap by default (`vertical_overlap_4_tables: 0`) so all 4 windows are 100% visible simultaneously without any window being covered. Old windows fill the top row horizontally first (Top-Left then Top-Right), new windows fill the bottom row vertically. If larger overlapping tables are preferred, `vertical_overlap_4_tables` can be set to any pixel value.
 - **5 to 6 Tables**: 3 columns &times; 2 rows with vertical overlap (default 50px). Leftover vertical space is allocated to the bottom of the screen.
 
 ### 2. Custom Layouts (Directory: `layouts/`)
@@ -286,5 +286,5 @@ py -3.13 -m pytest -v
 ### Q: Why do my other/auxiliary windows not get resized?
 **A:** By design, Window Tiler only updates the positions (`x`, `y`) of auxiliary windows (lobbies, note windows, cashiers) placing them side-by-side along the bottom. Windows Win32 API `SWP_NOSIZE` is used so their original dimensions and layouts are never modified.
 
-### Q: Why do tables have vertical overlap in 4-table mode?
-**A:** Standard poker tables maintain a widescreen ~16:10 aspect ratio. Stacking two full-height tables vertically would either make them too small or distort their graphics. The vertical overlap (configurable via `vertical_overlap_4_tables: 200`) ensures table felts are large and legible while keeping all betting buttons and action controls visible.
+### Q: Can tables have vertical overlap in 4-table mode?
+**A:** By default, 4-table mode uses 0 overlap (`vertical_overlap_4_tables: 0`) so all 4 tables are fully visible on screen. If you prefer larger tables that vertically overlap (similar to 6-table mode), you can set `vertical_overlap_4_tables` to e.g. `200` in `config.yaml`.

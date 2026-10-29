@@ -46,14 +46,14 @@ class SideBySideLayout(ArrangementStrategy):
         reuse_mode = self.get_reuse_mode(config)
 
         # 4-window mode vertical overlap: can be configured independently via vertical_overlap_4_tables
-        # Defaults to a bigger overlap (200px) when not specified, or inherits vertical_overlap if explicitly given
+        # Defaults to 0 so all 4 windows are fully visible when 4 windows are active
         v_overlap_4_cfg = config.get("vertical_overlap_4_tables", config.get("vertical_overlap_4", None))
         if v_overlap_4_cfg is not None:
             vertical_overlap_4 = int(v_overlap_4_cfg)
         elif "vertical_overlap" in config:
             vertical_overlap_4 = int(config["vertical_overlap"])
         else:
-            vertical_overlap_4 = 200
+            vertical_overlap_4 = 0
 
         # If reuse_mode is empty (default), only arrange up to max_spots
         if not reuse_mode:

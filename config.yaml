@@ -71,9 +71,9 @@ game_windows:
       # For 6-table mode (default: 50)
       vertical_overlap: 50
 
-      # For 4-table mode: bigger overlap (default: 200)
-      # 4-table mode can have a completely separate, larger overlap and larger table sizes than 6-table mode
-      vertical_overlap_4_tables: 300
+      # For 4-table mode: 0 (default: 0) so all 4 windows are fully visible without overlap
+      # Set to > 0 only if you prefer larger overlapping tables.
+      vertical_overlap_4_tables: 0
 
       # Maximum arranged spots on screen when > 4 tables are open (default: 6 spots)
       # Tables beyond this number will remain unarranged in the background.
